@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MediLens — Medicine, Dosage & Pharmacy Finder</title>
+  <style>
+    :root {
+      --bg-dark: #07130f;
+      --surface-dark: #0f241d;
+      --card-bg: #ffffff;
+      --card-muted: #f4f8f6;
+      --border: #d8e5de;
+      --text-main: #0f1f19;
+      --text-muted: #4b6158;
+      --text-light: #eef7f2;
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --accent: #10b981;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --warn-border: #fde68a;
+      --ok: #15803d;
+      --ok-bg: #f0fdf4;
+      --ok-border: #bbf7d0;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      line-height: 1.45;
+    }
+
+    .app-shell {
+      max-width: 540px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+    }
+
+    header {
+      padding: 12px 14px;
+      background: var(--surface-dark);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    select, button, input {
+      font-family: inherit;
+    }
+
+    .icon-btn {
+      background: #17362b;
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .icon-btn.active {
+      background: var(--primary);
+      border-color: var(--accent);
+    }
+
+    .lang-strip {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 14px;
+      background: #0b1c16;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      scrollbar-width: none;
+    }
+
+    .lang-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .lang-chip {
+      flex: 0 0 auto;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: transparent;
+      color: #cce3d9;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .lang-chip.selected {
+      background: var(--accent);
+      color: #052e16;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .camera-section {
+      padding: 12px 14px;
+    }
+
+    .viewfinder-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #030907;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    video, .preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .reticle {
+      position: absolute;
+      inset: 14%;
+      border: 2px dashed rgba(52, 211, 153, 0.7);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+
+    .camera-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(7, 19, 15, 0.82);
+      color: #d1fae5;
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .age-bar {
+      margin-top: 10px;
+      background: var(--surface-dark);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .age-bar label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #d1fae5;
+    }
+
+    .age-input {
+      width: 72px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: #07130f;
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .age-presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      padding: 5px 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #143026;
+      color: #e6f4ee;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .scan-controls {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .primary-scan-btn {
+      background: linear-gradient(135deg, #0d9488, #059669);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(5, 150, 105, 0.3);
+    }
+
+    .primary-scan-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .upload-btn {
+      background: #17362b;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sample-row {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .results-panel {
+      flex: 1;
+      background: var(--card-muted);
+      color: var(--text-main);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 16px 14px 36px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(15, 31, 25, 0.04);
+    }
+
+    .card-title {
+      margin: 0 0 8px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .alert-box {
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      border: 1px solid;
+    }
+
+    .alert-danger {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger);
+    }
+
+    .alert-warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn);
+    }
+
+    .alert-ok {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok);
+    }
+
+    .dosage-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .dose-tier {
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 0.86rem;
+    }
+
+    .dose-tier strong {
+      display: block;
+      color: var(--primary-dark);
+      margin-bottom: 2px;
+    }
+
+    .app-links-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .store-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #0f766e;
+      padding: 10px 11px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .pharmacy-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+    }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+
+    .open-pill {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border: 1px solid var(--ok-border);
+    }
+
+    .closed-pill {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger-border);
+    }
+
+    .nav-btn {
+      background: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .sources-list {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      font-size: 0.8rem;
+    }
+
+    .sources-list a {
+      color: var(--primary-dark);
+      word-break: break-word;
+    }
+
+    .chat-log {
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 8px 0 10px;
+    }
+
+    .msg {
+      padding: 9px 11px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      max-width: 90%;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .msg-bot {
+      align-self: flex-start;
+      background: var(--card-muted);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    .chat-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .mic-btn {
+      background: #0f766e;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 0 12px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .mic-btn.listening {
+      background: #dc2626;
+    }
+
+    .send-btn {
+      background: #115e59;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 0 12px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      color: var(--text-main);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .modal-card input, .modal-card select {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin: 6px 0 12px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      background: #ffffff;
+    }
+
+    .disclaimer {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span>MediLens</span>
+      </div>
+      <div class="header-actions">
+        <button id="voiceToggleBtn" class="icon-btn active" type="button">Voice: ON</button>
+        <button id="settingsBtn" class="icon-btn" type="button">API & Model</button>
+      </div>
+    </header>
+
+    <div id="langStrip" class="lang-strip" aria-label="Language selector"></div>
+
+    <section class="camera-section">
+      <div class="viewfinder-box">
+        <video id="videoFeed" autoplay playsinline muted></video>
+        <img id="capturedPreview" class="preview-img hidden" alt="Captured medicine preview" />
+        <div class="reticle"></div>
+        <div id="statusBadge" class="camera-badge">Point camera at medicine name</div>
+      </div>
+
+      <div class="age-bar">
+        <label for="patientAgeInput">Patient Age (yrs):</label>
+        <input id="patientAgeInput" class="age-input" type="number" min="0" max="120" value="28" />
+        <div class="age-presets">
+          <button class="mini-btn" type="button" data-age="5">5 yrs Child</button>
+          <button class="mini-btn" type="button" data-age="28">28 yrs Adult</button>
+          <button class="mini-btn" type="button" data-age="70">70 yrs Senior</button>
+        </div>
+      </div>
+
+      <div class="scan-controls">
+        <button id="scanBtn" class="primary-scan-btn" type="button">Scan Medicine</button>
+        <button id="uploadTriggerBtn" class="upload-btn" type="button">Photo</button>
+        <input id="fileInput" type="file" accept="image/*" capture="environment" class="hidden" />
+      </div>
+
+      <div class="sample-row">
+        <button id="sampleClearBtn" class="mini-btn" type="button">Test Sample: Azithromycin 500mg</button>
+        <button id="sampleBlurryBtn" class="mini-btn" type="button">Test Sample: Blurry Label (Safety Check)</button>
+      </div>
+    </section>
+
+    <main id="resultsPanel" class="results-panel">
+      <div id="statusBanner" class="alert-box alert-warn">
+        Enter your Gemini API key in <strong>API &amp; Model</strong> to scan real medicine labels with web-grounded dosage and live pharmacy search, or try the test samples above.
+      </div>
+
+      <div id="medicineCard" class="card hidden">
+        <div class="card-title">
+          <span id="medNameHeading">Medicine Details</span>
+          <span id="expiryTag" class="status-pill"></span>
+        </div>
+        <div id="medComposition" style="font-size:0.84rem;color:var(--text-muted);margin-bottom:8px;"></div>
+        <div id="medUses" style="font-size:0.9rem;"></div>
+        <div id="medWarnings" class="alert-box alert-warn" style="margin-top:10px;margin-bottom:0;"></div>
+        <ul id="searchSources" class="sources-list"></ul>
+      </div>
+
+      <div id="dosageCard" class="card hidden">
+        <h2 class="card-title">Dosage Guidance by Age</h2>
+        <div id="ageSpecificDose" class="alert-box alert-ok" style="margin-bottom:8px;"></div>
+        <div class="dosage-grid">
+          <div class="dose-tier">
+            <strong>Children (2–12 yrs)</strong>
+            <span id="doseChild">—</span>
+          </div>
+          <div class="dose-tier">
+            <strong>Adults (13–64 yrs)</strong>
+            <span id="doseAdult">—</span>
+          </div>
+          <div class="dose-tier">
+            <strong>Seniors (65+ yrs)</strong>
+            <span id="doseSenior">—</span>
+          </div>
+        </div>
+        <p class="disclaimer">Always verify exact weight-based or condition-specific dosing with a licensed doctor or pharmacist before taking medication.</p>
+      </div>
+
+      <div id="pharmacyAppsCard" class="card hidden">
+        <h2 class="card-title">Pharmacy Apps (Direct Search)</h2>
+        <div style="font-size:0.84rem;color:var(--text-muted);">Open with the scanned medicine pre-filled:</div>
+        <div id="pharmacyAppLinks" class="app-links-grid"></div>
+      </div>
+
+      <div id="nearbyPharmaciesCard" class="card hidden">
+        <div class="card-title">
+          <span>Nearby Pharmacies (Open vs. Closed)</span>
+          <button id="refreshPharmaciesBtn" class="mini-btn" style="color:#0f1f19;background:#e2ece7;" type="button">Refresh GPS</button>
+        </div>
+        <div id="pharmacyList"></div>
+      </div>
+
+      <div id="voiceChatCard" class="card hidden">
+        <h2 class="card-title">Voice &amp; Text Pharmacist Chat</h2>
+        <div id="chatLog" class="chat-log"></div>
+        <div class="chat-controls">
+          <input id="chatInput" class="chat-input" type="text" placeholder="Ask about dose, side effects, or open stores..." />
+          <button id="micBtn" class="mic-btn" type="button">Mic</button>
+          <button id="sendChatBtn" class="send-btn" type="button">Ask</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h2 id="modalTitle" style="margin:0 0 6px;font-size:1.05rem;">Gemini API &amp; Model Settings</h2>
+      <p style="margin:0 0 10px;font-size:0.82rem;color:var(--text-muted);">
+        Your API key stays only in this browser session. Real scans never guess when text is unreadable.
+      </p>
+      <label for="apiKeyInput" style="font-size:0.82rem;font-weight:700;">Gemini API Key</label>
+      <input id="apiKeyInput" type="password" placeholder="AIza..." autocomplete="off" />
+
+      <label for="modelSelect" style="font-size:0.82rem;font-weight:700;">Model</label>
+      <select id="modelSelect">
+        <option value="gemini-4-hydrogen">gemini-4-hydrogen (Fast / Free-tier friendly)</option>
+        <option value="gemini-4-neon">gemini-4-neon (High precision &amp; reasoning)</option>
+        <option value="gemini-4-carbon">gemini-4-carbon (Deep reasoning)</option>
+      </select>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="closeModalBtn" class="mini-btn" style="color:#0f1f19;background:#eef2f0;" type="button">Cancel</button>
+        <button id="saveSettingsBtn" class="primary-scan-btn" style="padding:9px 14px;font-size:0.86rem;" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LANGUAGES = [
+      { code: "en-IN", name: "English", native: "English" },
+      { code: "hi-IN", name: "Hindi", native: "हिंदी" },
+      { code: "bn-IN", name: "Bengali", native: "বাংলা" },
+      { code: "gu-IN", name: "Gujarati", native: "ગુજરાતી" },
+      { code: "pa-IN", name: "Punjabi", native: "ਪੰਜਾਬੀ" },
+      { code: "mr-IN", name: "Marathi", native: "मराठी" },
+      { code: "ta-IN", name: "Tamil", native: "தமிழ்" },
+      { code: "te-IN", name: "Telugu", native: "తెలుగు" },
+      { code: "ml-IN", name: "Malayalam", native: "മലയാളം" }
+    ];
+
+    const state = {
+      langCode: "en-IN",
+      langName: "English",
+      voiceEnabled: true,
+      apiKey: sessionStorage.getItem("medilens_api_key") || "",
+      model: sessionStorage.getItem("medilens_model") || "gemini-4-hydrogen",
+      coords: { lat: 22.5726, lng: 88.3639 },
+      lastMedicine: null,
+      lastPharmacies: [],
+      isListening: false
+    };
+
+    const els = {
+      langStrip: document.getElementById("langStrip"),
+      voiceToggleBtn: document.getElementById("voiceToggleBtn"),
+      settingsBtn: document.getElementById("settingsBtn"),
+      settingsModal: document.getElementById("settingsModal"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+      apiKeyInput: document.getElementById("apiKeyInput"),
+      modelSelect: document.getElementById("modelSelect"),
+      videoFeed: document.getElementById("videoFeed"),
+      capturedPreview: document.getElementById("capturedPreview"),
+      statusBadge: document.getElementById("statusBadge"),
+      patientAgeInput: document.getElementById("patientAgeInput"),
+      scanBtn: document.getElementById("scanBtn"),
+      uploadTriggerBtn: document.getElementById("uploadTriggerBtn"),
+      fileInput: document.getElementById("fileInput"),
+      sampleClearBtn: document.getElementById("sampleClearBtn"),
+      sampleBlurryBtn: document.getElementById("sampleBlurryBtn"),
+      statusBanner: document.getElementById("statusBanner"),
+      medicineCard: document.getElementById("medicineCard"),
+      medNameHeading: document.getElementById("medNameHeading"),
+      expiryTag: document.getElementById("expiryTag"),
+      medComposition: document.getElementById("medComposition"),
+      medUses: document.getElementById("medUses"),
+      medWarnings: document.getElementById("medWarnings"),
+      searchSources: document.getElementById("searchSources"),
+      dosageCard: document.getElementById("dosageCard"),
+      ageSpecificDose: document.getElementById("ageSpecificDose"),
+      doseChild: document.getElementById("doseChild"),
+      doseAdult: document.getElementById("doseAdult"),
+      doseSenior: document.getElementById("doseSenior"),
+      pharmacyAppsCard: document.getElementById("pharmacyAppsCard"),
+      pharmacyAppLinks: document.getElementById("pharmacyAppLinks"),
+      nearbyPharmaciesCard: document.getElementById("nearbyPharmaciesCard"),
+      pharmacyList: document.getElementById("pharmacyList"),
+      refreshPharmaciesBtn: document.getElementById("refreshPharmaciesBtn"),
+      voiceChatCard: document.getElementById("voiceChatCard"),
+      chatLog: document.getElementById("chatLog"),
+      chatInput: document.getElementById("chatInput"),
+      micBtn: document.getElementById("micBtn"),
+      sendChatBtn: document.getElementById("sendChatBtn")
+    };
+
+    function renderLanguageBar() {
+      els.langStrip.innerHTML = "";
+      for (const lang of LANGUAGES) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "lang-chip" + (lang.code === state.langCode ? " selected" : "");
+        btn.textContent = `${lang.native} (${lang.name})`;
+        btn.addEventListener("click", () => {
+          state.langCode = lang.code;
+          state.langName = lang.name;
+          renderLanguageBar();
+          if (state.lastMedicine) {
+            setBanner(`Language switched to ${lang.name}. Tap "Scan Medicine" to refresh results in ${lang.name}.`, "alert-ok");
+          }
+        });
+        els.langStrip.appendChild(btn);
+      }
+    }
+
+    function setBanner(html, type = "alert-warn") {
+      els.statusBanner.className = `alert-box ${type}`;
+      els.statusBanner.innerHTML = html;
+    }
+
+    function speakText(text) {
+      if (!state.voiceEnabled || !("speechSynthesis" in window) || !text) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = state.langCode;
+        const voices = window.speechSynthesis.getVoices();
+        const prefix = state.langCode.split("-")[0];
+        const match = voices.find((v) => v.lang.toLowerCase().startsWith(state.langCode.toLowerCase()))
+          || voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+        if (match) utter.voice = match;
+        window.speechSynthesis.speak(utter);
+      } catch (_) {}
+    }
+
+    async function initCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        els.statusBadge.textContent = "Camera unavailable — use Photo or Test Sample";
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+        els.videoFeed.srcObject = stream;
+        els.statusBadge.textContent = "Live rear camera ready";
+      } catch (_) {
+        els.statusBadge.textContent = "Camera blocked — use Photo or Test Sample";
+      }
+    }
+
+    function updateLocation() {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 6000 }
+      );
+    }
+
+    function captureFrameBase64() {
+      if (!els.capturedPreview.classList.contains("hidden") && els.capturedPreview.src.startsWith("data:image")) {
+        const parts = els.capturedPreview.src.split(",");
+        const mimeMatch = parts[0].match(/data:(.*?);base64/);
+        return {
+          mimeType: mimeMatch ? mimeMatch[1] : "image/jpeg",
+          data: parts[1]
+        };
+      }
+      const video = els.videoFeed;
+      if (!video.videoWidth || !video.videoHeight) return null;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.min(video.videoWidth, 1024);
+      canvas.height = Math.round((video.videoHeight / video.videoWidth) * canvas.width);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      els.capturedPreview.src = dataUrl;
+      els.capturedPreview.classList.remove("hidden");
+      return { mimeType: "image/jpeg", data: dataUrl.split(",")[1] };
+    }
+
+    function makeSampleDataUrl(title, subtitle, blurry = false) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 720;
+      canvas.height = 480;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = blurry ? "#d7dfdc" : "#ecfdf5";
+      ctx.fillRect(0, 0, 720, 480);
+      ctx.fillStyle = blurry ? "#64748b" : "#064e3b";
+      ctx.font = blurry ? "italic 24px sans-serif" : "bold 36px sans-serif";
+      ctx.fillText(title, 44, 150);
+      ctx.font = blurry ? "18px sans-serif" : "24px sans-serif";
+      ctx.fillStyle = blurry ? "#94a3b8" : "#0f766e";
+      ctx.fillText(subtitle, 44, 210);
+      if (!blurry) {
+        ctx.fillStyle = "#334155";
+        ctx.font = "20px sans-serif";
+        ctx.fillText("EXP: 08/2028  |  Batch: ML2026A", 44, 275);
+      }
+      if (blurry) {
+        ctx.filter = "blur(6px)";
+        const copy = document.createElement("canvas");
+        copy.width = 720;
+        copy.height = 480;
+        copy.getContext("2d").drawImage(canvas, 0, 0);
+        ctx.clearRect(0, 0, 720, 480);
+        ctx.filter = "blur(7px)";
+        ctx.drawImage(copy, 0, 0);
+        ctx.filter = "none";
+      }
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      return { mimeType: "image/jpeg", data: dataUrl.split(",")[1], dataUrl };
+    }
+
+    function parseJsonLoose(text) {
+      if (!text) return null;
+      const cleaned = text.replace(/```json|```/gi, "").trim();
+      try {
+        return JSON.parse(cleaned);
+      } catch (_) {
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            return JSON.parse(match[0]);
+          } catch (_) {}
+        }
+      }
+      return null;
+    }
+
+    async function callGemini(contents, tools = [], toolConfig = undefined) {
+      if (!state.apiKey) {
+        throw new Error("NO_API_KEY");
+      }
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(state.model)}:generateContent?key=${encodeURIComponent(state.apiKey)}`;
+      const body = { contents };
+      if (tools.length) body.tools = tools;
+      if (toolConfig) body.toolConfig = toolConfig;
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`API_${res.status}: ${errText}`);
+      }
+      return res.json();
+    }
+
+    function extractGroundingSources(responseJson) {
+      const sources = [];
+      const candidates = responseJson?.candidates || [];
+      for (const cand of candidates) {
+        const chunks = cand?.groundingMetadata?.groundingChunks || [];
+        for (const chunk of chunks) {
+          if (chunk.web?.uri) {
+            sources.push({ title: chunk.web.title || chunk.web.uri, uri: chunk.web.uri });
+          } else if (chunk.maps?.uri) {
+            sources.push({
+              title: chunk.maps.title || "Google Maps Pharmacy",
+              uri: chunk.maps.uri,
+              openNow: chunk.maps.openNow
+            });
+          }
+        }
+      }
+      return sources;
+    }
+
+    function renderPharmacyAppLinks(medicineName) {
+      const q = encodeURIComponent(medicineName);
+      const stores = [
+        { name: "Tata 1mg", url: `https://www.1mg.com/search/all?name=${q}` },
+        { name: "PharmEasy", url: `https://pharmeasy.in/search/all?name=${q}` },
+        { name: "Apollo Pharmacy", url: `https://www.apollopharmacy.in/search-medicines/${q}` },
+        { name: "Netmeds", url: `https://www.netmeds.com/catalogsearch/result?q=${q}` }
+      ];
+      els.pharmacyAppLinks.innerHTML = stores
+        .map(
+          (s) => `<a class="store-link-btn" href="${s.url}" target="_blank" rel="noopener noreferrer">
+            <span>${s.name}</span>
+            <span>Open &rarr;</span>
+          </a>`
+        )
+        .join("");
+      els.pharmacyAppsCard.classList.remove("hidden");
+    }
+
+    async function fetchNearbyPharmacies(medicineName) {
+      els.nearbyPharmaciesCard.classList.remove("hidden");
+      els.pharmacyList.innerHTML = `<div style="font-size:0.84rem;color:var(--text-muted);">Checking nearby pharmacies (Open vs. Closed) via Google Maps...</div>`;
+
+      if (!state.apiKey) {
+        els.pharmacyList.innerHTML = `<div style="font-size:0.84rem;color:var(--text-muted);">Add your Gemini API key in <strong>API &amp; Model</strong> to fetch live nearby open and closed pharmacies from Google Maps.</div>`;
+        return;
+      }
+
+      try {
+        const prompt = `Find nearby pharmacies / medical stores around my current location that may stock "${medicineName}".
+Respond in ${state.langName}.
+List both currently OPEN pharmacies and currently CLOSED pharmacies if visible.
+For each pharmacy, clearly state whether it is OPEN NOW or CLOSED, its address/area, and provide a Google Maps search URL if needed.`;
+
+        const data = await callGemini(
+          [{ role: "user", parts: [{ text: prompt }] }],
+          [{ google_maps: {} }],
+          {
+            retrievalConfig: {
+              latLng: {
+                latitude: state.coords.lat,
+                longitude: state.coords.lng
+              }
+            }
+          }
+        );
+
+        const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("
+") || "";
+        const mapChunks = (data?.candidates?.[0]?.groundingMetadata?.groundingChunks || [])
+          .filter((c) => c.maps?.title || c.maps?.uri)
+          .map((c) => ({
+            title: c.maps.title,
+            uri: c.maps.uri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.maps.title + " pharmacy")}`,
+            openNow: c.maps.openNow
+          }));
+
+        state.lastPharmacies = mapChunks;
+
+        if (mapChunks.length > 0) {
+          els.pharmacyList.innerHTML = mapChunks
+            .map((p) => {
+              const isOpen = p.openNow === true;
+              const isClosed = p.openNow === false;
+              const badgeClass = isOpen ? "open-pill" : isClosed ? "closed-pill" : "open-pill";
+              const badgeText = isOpen ? "OPEN NOW" : isClosed ? "CLOSED" : "CHECK HOURS";
+              return `<div class="pharmacy-item">
+                <div>
+                  <span class="status-pill ${badgeClass}">${badgeText}</span>
+                  <div style="font-weight:700;font-size:0.9rem;">${p.title}</div>
+                </div>
+                <a class="nav-btn" href="${p.uri}" target="_blank" rel="noopener noreferrer">Maps</a>
+              </div>`;
+            })
+            .join("");
+        } else {
+          els.pharmacyList.innerHTML = `<div style="font-size:0.86rem;white-space:pre-line;">${text || "No nearby pharmacy details returned."}</div>`;
+        }
+      } catch (err) {
+        els.pharmacyList.innerHTML = `<div class="alert-box alert-warn" style="margin:0;">Could not load nearby pharmacies right now: ${err.message}</div>`;
+      }
+    }
+
+    function handleUnreadableImage(reasonText) {
+      els.medicineCard.classList.add("hidden");
+      els.dosageCard.classList.add("hidden");
+      els.pharmacyAppsCard.classList.add("hidden");
+      els.nearbyPharmaciesCard.classList.add("hidden");
+      els.voiceChatCard.classList.add("hidden");
+      state.lastMedicine = null;
+
+      const msg = reasonText || "The medicine name or active ingredient is not clearly readable. Please take a clearer, well-lit photo of the label so we do not guess any medicine or dosage.";
+      setBanner(`<strong>Unclear Medicine Image — No Guess Made:</strong> ${msg}`, "alert-danger");
+      speakText(msg);
+    }
+
+    async function analyzeMedicineImage(imageObj, isDemoSample = false) {
+      const age = parseInt(els.patientAgeInput.value, 10);
+      const patientAge = Number.isFinite(age) && age >= 0 ? age : 28;
+
+      if (!state.apiKey) {
+        if (isDemoSample && imageObj.sampleType === "blurry") {
+          handleUnreadableImage("Blurry test sample detected: medicine name is illegible, so MediLens refuses to guess a drug or dosage.");
+          return;
+        }
+        if (isDemoSample && imageObj.sampleType === "clear") {
+          const demoMed = {
+            isLegible: true,
+            medicineName: "Azithromycin 500mg (Sample Preview)",
+            composition: "Azithromycin IP 500 mg",
+            expiryStatus: "Sample EXP 08/2028 — Check actual strip before use",
+            whatItDoes: "Sample preview only (no API key entered): Azithromycin is a macrolide antibiotic used for specific bacterial infections only when prescribed by a doctor.",
+            warnings: "Do not self-medicate antibiotics. Enter a Gemini API key to look up real scanned medicines live via Google Search.",
+            ageSpecificGuidance: `For a ${patientAge}-year-old patient, follow a physician's prescription strictly.`,
+            dosageByAge: {
+              child: "Weight-based pediatric dose only if prescribed by a doctor.",
+              adult: "Standard adult regimens are prescribed by a doctor based on infection type.",
+              senior: "Follow physician guidance; monitor for drug interactions or GI effects."
+            },
+            sources: []
+          };
+          renderMedicineResult(demoMed, patientAge);
+          setBanner("Showing built-in test preview. Add your Gemini API key in <strong>API &amp; Model</strong> to scan any real medicine.", "alert-warn");
+          return;
+        }
+        els.settingsModal.classList.add("open");
+        setBanner("Please enter your Gemini API key first so MediLens can read the label and search the web.", "alert-warn");
+        return;
+      }
+
+      els.scanBtn.disabled = true;
+      setBanner(`Step 1/2: Reading medicine name from image in ${state.langName}...`, "alert-warn");
+
+      try {
+        const visionPrompt = `Look closely at this medicine image.
+First check whether the medicine name or active salt composition is clearly legible without guessing.
+If the medicine name/composition is blurry, cropped, obscured, or unreadable, return ONLY JSON:
+{"isLegible":false,"reason":"Clear explanation in ${state.langName} asking for a clearer photo without guessing"}
+
+If the medicine name/composition IS legible, return ONLY valid JSON:
+{
+  "isLegible": true,
+  "medicineName": "Exact medicine name and strength seen on pack",
+  "composition": "Active ingredients/salt if visible",
+  "expiryText": "Expiry date text if visible or 'Not clearly visible'"
+}`;
+
+        const visionData = await callGemini([
+          {
+            role: "user",
+            parts: [
+              { inlineData: { mimeType: imageObj.mimeType, data: imageObj.data } },
+              { text: visionPrompt }
+            ]
+          }
+        ]);
+
+        const visionRaw = visionData?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+        const visionJson = parseJsonLoose(visionRaw);
+
+        if (!visionJson || visionJson.isLegible !== true || !visionJson.medicineName) {
+          handleUnreadableImage(visionJson?.reason);
+          return;
+        }
+
+        setBanner(`Step 2/2: Searching medical info &amp; age-${patientAge} dosage for <strong>${visionJson.medicineName}</strong> in ${state.langName}...`, "alert-ok");
+
+        const searchPrompt = `Use Google Search to gather accurate medical information about the medicine "${visionJson.medicineName}" (composition: "${visionJson.composition || "unknown"}").
+The patient's age is ${patientAge} years.
+Write all explanations in ${state.langName}.
+Return ONLY valid JSON:
+{
+  "whatItDoes": "Clear explanation of what this medicine treats and how it works in ${state.langName}",
+  "expiryStatus": "Note on expiry '${visionJson.expiryText || "not visible"}' and checking pack expiry before use in ${state.langName}",
+  "warnings": "Key safety warnings, side effects, or prescription/contraindication cautions in ${state.langName}",
+  "ageSpecificGuidance": "Age-appropriate dosing guidance tailored to a ${patientAge}-year-old patient (noting when doctor/weight-based guidance is required) in ${state.langName}",
+  "dosageByAge": {
+    "child": "General pediatric (2-12 yrs) dosing guidance or caution in ${state.langName}",
+    "adult": "General adult (13-64 yrs) dosing guidance in ${state.langName}",
+    "senior": "General senior (65+ yrs) dosing guidance or adjustment note in ${state.langName}"
+  }
+}`;
+
+        const searchData = await callGemini(
+          [{ role: "user", parts: [{ text: searchPrompt }] }],
+          [{ google_search: {} }]
+        );
+
+        const searchRaw = searchData?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+        const searchJson = parseJsonLoose(searchRaw) || {};
+        const sources = extractGroundingSources(searchData);
+
+        const fullResult = {
+          isLegible: true,
+          medicineName: visionJson.medicineName,
+          composition: visionJson.composition || "Composition not listed on visible label",
+          expiryStatus: searchJson.expiryStatus || `Expiry: ${visionJson.expiryText || "Check label"}`,
+          whatItDoes: searchJson.whatItDoes || searchRaw,
+          warnings: searchJson.warnings || "Consult a qualified doctor or pharmacist before use.",
+          ageSpecificGuidance: searchJson.ageSpecificGuidance || `Consult a doctor for age ${patientAge} dosing.`,
+          dosageByAge: {
+            child: searchJson.dosageByAge?.child || "Consult a pediatrician.",
+            adult: searchJson.dosageByAge?.adult || "Follow label/doctor instructions.",
+            senior: searchJson.dosageByAge?.senior || "Consult a doctor for senior dosing."
+          },
+          sources
+        };
+
+        renderMedicineResult(fullResult, patientAge);
+        setBanner(`Identified <strong>${fullResult.medicineName}</strong> (${state.langName}).`, "alert-ok");
+        renderPharmacyAppLinks(fullResult.medicineName);
+        fetchNearbyPharmacies(fullResult.medicineName);
+      } catch (err) {
+        if (err.message === "NO_API_KEY") {
+          els.settingsModal.classList.add("open");
+          setBanner("Please enter your Gemini API key in <strong>API &amp; Model</strong>.", "alert-warn");
+        } else {
+          setBanner(`Scan failed: ${err.message}`, "alert-danger");
+        }
+      } finally {
+        els.scanBtn.disabled = false;
+      }
+    }
+
+    function renderMedicineResult(med, patientAge) {
+      state.lastMedicine = med;
+      els.medicineCard.classList.remove("hidden");
+      els.dosageCard.classList.remove("hidden");
+      els.voiceChatCard.classList.remove("hidden");
+
+      els.medNameHeading.textContent = med.medicineName;
+      els.expiryTag.textContent = med.expiryStatus;
+      els.expiryTag.className = "status-pill open-pill";
+      els.medComposition.textContent = med.composition;
+      els.medUses.textContent = med.whatItDoes;
+      els.medWarnings.textContent = med.warnings;
+
+      els.ageSpecificDose.innerHTML = `<strong>Age ${patientAge} Guidance:</strong> ${med.ageSpecificGuidance}`;
+      els.doseChild.textContent = med.dosageByAge.child;
+      els.doseAdult.textContent = med.dosageByAge.adult;
+      els.doseSenior.textContent = med.dosageByAge.senior;
+
+      if (med.sources && med.sources.length) {
+        els.searchSources.innerHTML = med.sources
+          .slice(0, 4)
+          .map((s) => `<li><a href="${s.uri}" target="_blank" rel="noopener noreferrer">${s.title}</a></li>`)
+          .join("");
+      } else {
+        els.searchSources.innerHTML = "";
+      }
+
+      speakText(`${med.medicineName}. ${med.whatItDoes}. ${med.ageSpecificGuidance}`);
+    }
+
+    function appendChatMessage(text, sender = "bot") {
+      const div = document.createElement("div");
+      div.className = `msg ${sender === "user" ? "msg-user" : "msg-bot"}`;
+      div.textContent = text;
+      els.chatLog.appendChild(div);
+      els.chatLog.scrollTop = els.chatLog.scrollHeight;
+    }
+
+    async function sendChatQuestion(questionText) {
+      const q = (questionText || els.chatInput.value).trim();
+      if (!q) return;
+      els.chatInput.value = "";
+      appendChatMessage(q, "user");
+
+      if (!state.apiKey) {
+        const reply = "Please add your Gemini API key in API & Model to chat about this medicine.";
+        appendChatMessage(reply, "bot");
+        speakText(reply);
+        return;
+      }
+
+      const age = parseInt(els.patientAgeInput.value, 10) || 28;
+      const medContext = state.lastMedicine
+        ? `Scanned medicine: ${state.lastMedicine.medicineName} (${state.lastMedicine.composition}). Uses: ${state.lastMedicine.whatItDoes}.`
+        : "No medicine scanned yet.";
+
+      try {
+        const prompt = `${medContext} Patient age: ${age} years.
+Answer the user's question concisely and safely in ${state.langName}: "${q}"`;
+        const data = await callGemini(
+          [{ role: "user", parts: [{ text: prompt }] }],
+          [{ google_search: {} }]
+        );
+        const reply = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("
+") || "Could not answer right now.";
+        appendChatMessage(reply, "bot");
+        speakText(reply);
+      } catch (err) {
+        appendChatMessage(`Error: ${err.message}`, "bot");
+      }
+    }
+
+    function setupSpeechRecognition() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        els.micBtn.addEventListener("click", () => {
+          setBanner("Voice input is not supported in this browser; type your question instead.", "alert-warn");
+        });
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+
+      rec.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        els.chatInput.value = transcript;
+        sendChatQuestion(transcript);
+      };
+
+      rec.onend = () => {
+        state.isListening = false;
+        els.micBtn.classList.remove("listening");
+        els.micBtn.textContent = "Mic";
+      };
+
+      rec.onerror = () => {
+        state.isListening = false;
+        els.micBtn.classList.remove("listening");
+        els.micBtn.textContent = "Mic";
+      };
+
+      els.micBtn.addEventListener("click", () => {
+        if (state.isListening) {
+          rec.stop();
+          return;
+        }
+        rec.lang = state.langCode;
+        state.isListening = true;
+        els.micBtn.classList.add("listening");
+        els.micBtn.textContent = "Stop";
+        rec.start();
+      });
+    }
+
+    els.voiceToggleBtn.addEventListener("click", () => {
+      state.voiceEnabled = !state.voiceEnabled;
+      els.voiceToggleBtn.textContent = state.voiceEnabled ? "Voice: ON" : "Voice: OFF";
+      els.voiceToggleBtn.classList.toggle("active", state.voiceEnabled);
+      if (!state.voiceEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    });
+
+    els.settingsBtn.addEventListener("click", () => {
+      els.apiKeyInput.value = state.apiKey;
+      els.modelSelect.value = state.model;
+      els.settingsModal.classList.add("open");
+    });
+
+    els.closeModalBtn.addEventListener("click", () => {
+      els.settingsModal.classList.remove("open");
+    });
+
+    els.saveSettingsBtn.addEventListener("click", () => {
+      state.apiKey = els.apiKeyInput.value.trim();
+      state.model = els.modelSelect.value;
+      sessionStorage.setItem("medilens_api_key", state.apiKey);
+      sessionStorage.setItem("medilens_model", state.model);
+      els.settingsModal.classList.remove("open");
+      setBanner(`Saved settings (${state.model}). Ready to scan medicines.`, "alert-ok");
+    });
+
+    document.querySelectorAll("[data-age]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        els.patientAgeInput.value = btn.getAttribute("data-age");
+      });
+    });
+
+    els.scanBtn.addEventListener("click", () => {
+      const frame = captureFrameBase64();
+      if (!frame) {
+        setBanner("No camera frame available yet. Tap <strong>Photo</strong> or choose a <strong>Test Sample</strong>.", "alert-warn");
+        return;
+      }
+      analyzeMedicineImage(frame, false);
+    });
+
+    els.uploadTriggerBtn.addEventListener("click", () => {
+      els.fileInput.click();
+    });
+
+    els.fileInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        els.capturedPreview.src = dataUrl;
+        els.capturedPreview.classList.remove("hidden");
+        const base64 = dataUrl.split(",")[1];
+        analyzeMedicineImage({ mimeType: file.type || "image/jpeg", data: base64 }, false);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    els.sampleClearBtn.addEventListener("click", () => {
+      const s = makeSampleDataUrl("Azithromycin Tablets IP 500 mg", "Azithromycin Dihydrate IP", false);
+      els.capturedPreview.src = s.dataUrl;
+      els.capturedPreview.classList.remove("hidden");
+      analyzeMedicineImage({ ...s, sampleType: "clear" }, true);
+    });
+
+    els.sampleBlurryBtn.addEventListener("click", () => {
+      const s = makeSampleDataUrl("Smudged Strip Text", "Unreadable Dosage", true);
+      els.capturedPreview.src = s.dataUrl;
+      els.capturedPreview.classList.remove("hidden");
+      analyzeMedicineImage({ ...s, sampleType: "blurry" }, true);
+    });
+
+    els.refreshPharmaciesBtn.addEventListener("click", () => {
+      updateLocation();
+      const medName = state.lastMedicine?.medicineName || "medicine";
+      fetchNearbyPharmacies(medName);
+    });
+
+    els.sendChatBtn.addEventListener("click", () => sendChatQuestion());
+    els.chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendChatQuestion();
+    });
+
+    renderLanguageBar();
+    setupSpeechRecognition();
+    updateLocation();
+    initCamera();
+  </script>
+</body>
+</html>

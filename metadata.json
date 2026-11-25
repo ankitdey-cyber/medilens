@@ -1,0 +1,6 @@
+{
+  "name": "MediLens",
+  "description": "Camera-first medicine label scanner, multilingual medicine information, nearby pharmacy finder, and voice pharmacist assistant.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
