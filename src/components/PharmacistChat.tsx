@@ -191,7 +191,7 @@ export const PharmacistChat: React.FC<PharmacistChatProps> = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about ingredients, food interactions, or side effects..."
-          className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+          className="flex-1 min-w-0 min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
         />
 
         <button
